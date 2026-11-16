@@ -34,8 +34,8 @@ def main():
     
     running = True
 
-    font = pygame.font.SysFont("Arial", 20)
-    text_display = font.render("Click the asteroid to mine", True, (255, 255, 255))
+    font = pygame.font.SysFont("Arial", 25, True)
+    text_display = font.render("Click the asteroid to mine", True, (255, 255, 255), None, 200)
 
     while running:
 
@@ -52,14 +52,14 @@ def main():
 
         if pygame.mouse.get_just_pressed()[0]:
             asteroid.click(mouse_pos, button_rad=100)
-            text_display = font.render("Asteroids mined: " + str(clicks), True, (255, 255, 255))
+            text_display = font.render("Asteroids mined: " + str(clicks), True, (255, 255, 255), None, 200)
 
         for x in range(0, s_width, bg_tile.get_width()):
             for y in range(0, s_hight, bg_tile.get_height()):
                 screen.blit(bg_tile, (x, y))
 
         
-        screen.blit(text_display, (250, 100))
+        screen.blit(text_display, (230, 100))
         asteroid.draw(screen)
         pygame.display.flip()
 
