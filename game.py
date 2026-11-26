@@ -6,6 +6,9 @@ s_width = 640
 s_hight = 480
 clicks = 0
 
+content_height = 800
+scroll_y = 0
+
 class Asteroid():
     def __init__(self, pos=(0, 0)):
         self.image = pygame.image.load("graphics\Asteroid.png")
@@ -29,6 +32,8 @@ def main():
     pygame.display.set_icon(icon)
 
     screen = pygame.display.set_mode((s_width, s_hight))
+    content = pygame.Surface((s_width, content_height))
+
     bg_tile = pygame.image.load("graphics\starBackground.png").convert()
     asteroid = Asteroid(pos=((s_width//2) - 80, (s_hight//2) - 80))
     
@@ -36,6 +41,8 @@ def main():
 
     font = pygame.font.SysFont("Arial", 25, True)
     text_display = font.render("Click the asteroid to mine", True, (255, 255, 255), None, 200)
+
+    global scroll_y
 
     while running:
 
@@ -48,19 +55,25 @@ def main():
             keys = pygame.key.get_pressed()
             if keys[pygame.K_ESCAPE]:
                 running = False
+            if event.type == pygame.MOUSEWHEEL:
+                scroll_y -= event.y * 30
+
+        scroll_y = max(0, min(scroll_y, content_height - s_hight))
 
 
         if pygame.mouse.get_just_pressed()[0]:
-            asteroid.click(mouse_pos, button_rad=100)
+            adjusted_mouse = (mouse_pos[0], mouse_pos[1] + scroll_y)
+            asteroid.click(adjusted_mouse, button_rad=100)
             text_display = font.render("Asteroids mined: " + str(clicks), True, (255, 255, 255), None, 200)
 
         for x in range(0, s_width, bg_tile.get_width()):
-            for y in range(0, s_hight, bg_tile.get_height()):
-                screen.blit(bg_tile, (x, y))
+            for y in range(0, content_height, bg_tile.get_height()):
+                content.blit(bg_tile, (x, y))
 
         
-        screen.blit(text_display, (230, 100))
-        asteroid.draw(screen)
+        content.blit(text_display, (230, 100))
+        asteroid.draw(content)
+        screen.blit(content, (0, 0), (0, scroll_y, s_width, s_hight))
         pygame.display.flip()
 
 if __name__ == "__main__":
