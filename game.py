@@ -45,7 +45,7 @@ class Drill():
                 clicks -= 20
                 drills += 1
             else:
-                print("no")
+                return
 
 def main():
     pygame.init()
@@ -67,7 +67,8 @@ def main():
     font = pygame.font.SysFont("Arial", 25, True)
     font_small = pygame.font.SysFont("Arial", 20, True)
     text_display = font.render("Click the asteroid to mine", True, (255, 255, 255), None, 200)
-    shop_text = font_small.render("Cost: 20 asteroids", True, (255, 255, 255), None, 200)
+    shop_text = font_small.render("Cost: 20 asteroids", True, (255, 255, 255), None)
+    shop_title = font_small.render("Auto Miner", True, (255, 255, 255), None)
     
 
     global scroll_y
@@ -116,6 +117,7 @@ def main():
         content.blit(text_display, (225, 120))
         content.blit(drill_text, (255, 330))
         content.blit(shop_text, (80, 600))
+        content.blit(shop_title, (100, 500))
         asteroid.draw(content)
         drill.draw(content)
         screen.blit(content, (0, 0), (0, scroll_y, s_width, s_hight))
