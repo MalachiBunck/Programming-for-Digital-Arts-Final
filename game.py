@@ -4,8 +4,9 @@ import pygame
 
 s_width = 640
 s_hight = 480
-clicks = 0
+score = 0
 drills = 0
+click_amount = 1
 
 content_height = 800
 scroll_y = 0
@@ -19,12 +20,13 @@ class Asteroid():
         screen.blit(self.image, self.pos)
 
     def click(self, mouse_pos, button_rad):
+        global click_amount
+        global score
         mouse_x, mouse_y = mouse_pos
         self_x, self_y = self.pos
         button_dist = pygame.math.Vector2(mouse_x - (self_x + 80), mouse_y - (self_y + 80)).length()
         if button_dist <= button_rad:
-            global clicks
-            clicks += 1
+            score += click_amount
 
 class Drill():
     def __init__(self, pos=(0, 0)):
@@ -35,15 +37,36 @@ class Drill():
         screen.blit(self.image, self.pos)
 
     def click(self, mouse_pos, button_rad):
-        global clicks
+        global score
         global drills
         mouse_x, mouse_y = mouse_pos
         self_x, self_y = self.pos
         button_dist = pygame.math.Vector2(mouse_x - (self_x + 80), mouse_y - (self_y + 40)).length()
         if button_dist <= button_rad:
-            if clicks >= 20:
-                clicks -= 20
+            if score >= 20:
+                score -= 20
                 drills += 1
+            else:
+                return
+
+class Click_Upgrade():
+    def __init__(self, pos=(0, 0)):
+            self.image = pygame.image.load("graphics/upgrade.png")
+            self.pos = pygame.Vector2(pos)
+    
+    def draw(self, screen):
+        screen.blit(self.image, self.pos)
+
+    def click(self, mouse_pos, button_rad):
+        global score
+        global click_amount
+        mouse_x, mouse_y = mouse_pos
+        self_x, self_y = self.pos
+        button_dist = pygame.math.Vector2(mouse_x - (self_x + 80), mouse_y - (self_y + 40)).length()
+        if button_dist <= button_rad:
+            if score >= 30:
+                score -= 30
+                click_amount += 1
             else:
                 return
 
@@ -60,6 +83,7 @@ def main():
     bg_shop = pygame.image.load("graphics\shop_bg.png")
     asteroid = Asteroid(pos=((s_width//2) - 80, (s_hight//2) - 80))
     drill = Drill(pos=((s_width//4) - 80, (content_height - 200) - 80))
+    upgrade = Click_Upgrade(pos=((s_width - 160) - 80, (content_height - 200) - 80))
 
     last_click_time = pygame.time.get_ticks()
     running = True
@@ -77,22 +101,28 @@ def main():
     font = pygame.font.SysFont("Arial", 25, True)
     font_small = pygame.font.SysFont("Arial", 20, True)
     text_display = font.render("Click the asteroid to mine", True, (255, 255, 255), None, 200)
-    shop_text = font_small.render("Cost: 20 asteroids", True, (255, 255, 255), None)
-    shop_title = font_small.render("Auto Miner", True, (255, 255, 255), None)
-    
+    drill_cost = font_small.render("Cost: 20 asteroids", True, (255, 255, 255), None)
+    drill_title = font_small.render("Auto Miner", True, (255, 255, 255), None)
+    upgrade_title = font_small.render("Drill Size", True, (255, 255, 255), None)
+    upgrade_cost = font_small.render("Cost: 30 asteroids", True, (255, 255, 255), None)
 
     global scroll_y
-    global clicks
+    global score
     global drills
+    global click_amount
 
     if "score" in save_data:
-        clicks = save_data["score"]
+        score = save_data["score"]
     else:
-        clicks = 0
+        score = 0
     if "drills" in save_data:
         drills = save_data["drills"]
     else:
         drills = 0
+    if "click_amount" in save_data:
+            click_amount = save_data["click_amount"]
+    else:
+        click_amount = 1
 
     while running:
 
@@ -101,19 +131,22 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 with open("save.txt", "w") as file:
-                    file.write(f"score: {clicks}\n")
+                    file.write(f"score: {score}\n")
                     file.write(f"drills: {drills}\n")
+                    file.write(f"click_amount: {click_amount}\n")
                 pygame.quit()
                 sys.exit()
             keys = pygame.key.get_pressed()
             if keys[pygame.K_ESCAPE]:
                 with open("save.txt", "w") as file:
-                    file.write(f"score: {clicks}\n")
+                    file.write(f"score: {score}\n")
                     file.write(f"drills: {drills}\n")
+                    file.write(f"click_amount: {click_amount}\n")
                 running = False
             if event.type == pygame.MOUSEWHEEL:
                 scroll_y -= event.y * 30
             drill_text = font_small.render("Auto mining: " + str(drills) + "\s", True, (255, 255, 255), None, 200)
+            upgrade_text = font_small.render("Asteroids per Click: " + str(click_amount), True, (255, 255, 255), None, 200)
 
         scroll_y = max(0, min(scroll_y, content_height - s_hight))
 
@@ -121,7 +154,7 @@ def main():
 
         if drills >= 1:
             if current_time - last_click_time >= 1000:
-                clicks += drills
+                score += drills
                 last_click_time = current_time
                 
                 
@@ -130,21 +163,26 @@ def main():
             adjusted_mouse = (mouse_pos[0], mouse_pos[1] + scroll_y)
             asteroid.click(adjusted_mouse, button_rad=100)
             drill.click(adjusted_mouse, button_rad=100)
+            upgrade.click(adjusted_mouse, button_rad=100)
             
 
         for x in range(0, s_width, bg_tile.get_width()):
             for y in range(0, content_height, bg_tile.get_height()):
                 content.blit(bg_tile, (x, y))
 
-        text_display = font.render("Asteroids mined: " + str(clicks), True, (255, 255, 255), None, 200)
+        text_display = font.render("Asteroids mined: " + str(score), True, (255, 255, 255), None, 200)
 
         content.blit(bg_shop, (0, 440))
         content.blit(text_display, (225, 120))
         content.blit(drill_text, (255, 330))
-        content.blit(shop_text, (80, 600))
-        content.blit(shop_title, (100, 500))
+        content.blit(drill_cost, (80, 600))
+        content.blit(drill_title, (100, 500))
+        content.blit(upgrade_text, (237, 355))
+        content.blit(upgrade_cost, (420, 600))
+        content.blit(upgrade_title, (450, 500))
         asteroid.draw(content)
         drill.draw(content)
+        upgrade.draw(content)
         screen.blit(content, (0, 0), (0, scroll_y, s_width, s_hight))
         pygame.display.flip()
 
