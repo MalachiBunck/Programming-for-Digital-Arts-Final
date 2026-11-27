@@ -64,6 +64,16 @@ def main():
     last_click_time = pygame.time.get_ticks()
     running = True
 
+    save_data = {}
+    try:
+        with open("save.txt", "r") as file:
+            for line in file:
+                if ":" in line:
+                    key, value = line.strip().split(":", 1)
+                    save_data[key.strip()] = int(value.strip())
+    except FileNotFoundError:
+        pass
+
     font = pygame.font.SysFont("Arial", 25, True)
     font_small = pygame.font.SysFont("Arial", 20, True)
     text_display = font.render("Click the asteroid to mine", True, (255, 255, 255), None, 200)
@@ -75,16 +85,31 @@ def main():
     global clicks
     global drills
 
+    if "score" in save_data:
+        clicks = save_data["score"]
+    else:
+        clicks = 0
+    if "drills" in save_data:
+        drills = save_data["drills"]
+    else:
+        drills = 0
+
     while running:
 
         mouse_pos = pygame.mouse.get_pos()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                with open("save.txt", "w") as file:
+                    file.write(f"score: {clicks}\n")
+                    file.write(f"drills: {drills}\n")
                 pygame.quit()
                 sys.exit()
             keys = pygame.key.get_pressed()
             if keys[pygame.K_ESCAPE]:
+                with open("save.txt", "w") as file:
+                    file.write(f"score: {clicks}\n")
+                    file.write(f"drills: {drills}\n")
                 running = False
             if event.type == pygame.MOUSEWHEEL:
                 scroll_y -= event.y * 30
