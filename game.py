@@ -57,6 +57,7 @@ def main():
     content = pygame.Surface((s_width, content_height))
 
     bg_tile = pygame.image.load("graphics\starBackground.png").convert()
+    bg_shop = pygame.image.load("graphics\shop_bg.png")
     asteroid = Asteroid(pos=((s_width//2) - 80, (s_hight//2) - 80))
     drill = Drill(pos=((s_width//4) - 80, (content_height - 200) - 80))
 
@@ -110,6 +111,8 @@ def main():
                 content.blit(bg_tile, (x, y))
 
         text_display = font.render("Asteroids mined: " + str(clicks), True, (255, 255, 255), None, 200)
+
+        content.blit(bg_shop, (0, 440))
         content.blit(text_display, (225, 120))
         content.blit(drill_text, (255, 330))
         content.blit(shop_text, (80, 600))
