@@ -75,7 +75,7 @@ class Click_Upgrade():
         if button_dist <= button_rad:
             if score >= click_cost:
                 score -= click_cost
-                click_cost *= 2
+                click_cost += 30
                 click_amount += 1
             else:
                 return
@@ -213,6 +213,7 @@ def main():
                 running = False
             if event.type == pygame.MOUSEWHEEL:
                 scroll_y -= event.y * 30
+
             drill_text = font_small.render("Auto mining: " + str(drills * drill_upgrade) + "\s", True, (255, 255, 255), None, 200)
             upgrade_text = font_small.render("Asteroids per Click: " + str(click_amount), True, (255, 255, 255), None, 200)
             du_text_cost = font_small.render("Cost: " + str(du_cost) + " asteroids", True, (255, 255, 255), None)
